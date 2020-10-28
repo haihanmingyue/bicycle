@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace - 对应具体的接口的名字  -->
+<mapper namespace="com.aowin.dao.VenderMapper">
+
+	<select id="getAllVender" parameterType="map" resultType="com.aowin.model.Vender">
+		select
+		*
+		from
+		vender
+		where
+		1=1
+		<if test="keysS != null and keysS != '' "> and concat(VENDER_ID,VENDER_CODE,VENDER_NAME,TELPHONE,CONTACTS) like "%"#{keysS}"%"</if>
+		<if test="typeS != null and typeS != '' "> and VENDER_TYPE = #{typeS} </if>
+		<if test="zxbjS != null and zxbjS != '' "> and zxbj = #{zxbjS} </if>
+	</select>
+
+
+	<select id="getVenderList" parameterType="map" resultType="com.aowin.model.Vender">
+		select
+		VENDER_ID,VENDER_NAME,VENDER_TYPE,ZXBJ
+		from
+		vender
+		where
+		ZXBJ = 0
+	</select>
+
+	<select id="selectVenderByCode" parameterType="com.aowin.model.Vender" resultType="int">
+		select
+		count(1)
+		from
+		vender
+		where
+		vender_name = #{vender_name}
+		<if test="bussiness_registration_no != null and bussiness_registration_no != '' "> or bussiness_registration_no = #{bussiness_registration_no} </if>
+		<if test="product_license != null and product_license != '' "> or product_license = #{product_license} </if>
+		<if test="vender_code != null and vender_code != '' "> or vender_code = #{vender_code} </if>
+	</select>
+
+
+	<select id="getVenderById" resultType="com.aowin.model.Vender">
+		select
+		*
+		from
+		vender
+		where
+		vender_id = #{vender_id}
+	</select>
+
+	<insert id="addVender"  parameterType="com.aowin.model.Vender" >
+		insert into
+		vender
+		(
+		vender_code,VENDER_TYPE,VENDER_NAME,ADDRESS,TELPHONE,
+		CONTACTS,PRODUCT_LICENSE,BUSSINESS_REGISTRATION_NO,REGISTERED_CAPITAL,USER_ID,
+		CREATE_TIME,ZXBJ,REMARK
+		)
+		values
+		(
+		#{vender_code},#{vender_type},#{vender_name},#{address},#{telPhone},
+		#{contacts},#{product_license},#{bussiness_registration_no},#{registered_capital},#{user_id},
+		#{create_time},#{zxbj},#{remark}
+		)
+
+	</insert>
+
+
+	<update id="updateVender"  parameterType="com.aowin.model.Vender" >
+		update vender
+		set
+		VENDER_TYPE = #{vender_type},VENDER_NAME = #{vender_name},ADDRESS = #{address},TELPHONE = #{telPhone},
+		CONTACTS = #{contacts},PRODUCT_LICENSE = #{product_license},BUSSINESS_REGISTRATION_NO = #{bussiness_registration_no},
+		REGISTERED_CAPITAL = #{registered_capital},USER_ID = #{user_id},REMARK = #{remark}
+		where vender_id = #{vender_id};
+	</update>
+
+	<update id="cancelVender" parameterType="map">
+		update vender
+		set
+		zxbj = 1,user_id = #{user_id}
+		where
+		vender_id = #{vender_id}
+	</update>
+	
+</mapper>

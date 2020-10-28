@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>供应商管理</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+</head>
+<style>
+    th{
+        background-color: #d4d4d4;
+    }
+    .form-c{
+        position: relative;
+        margin-left: 0px;
+        height: 30px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    }
+    .form-c:focus {
+        border-color: #66afe9;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+</style>
+<body>
+
+<div style="height: 20px" >
+    &nbsp;
+</div>
+<div >
+    <span style="float: left">车辆费用统计</span>
+    <div id="sign" style="border-bottom: #d4d4d4 1px solid">
+        &nbsp;
+    </div>
+
+    <div id="table">
+        <table id="tables" class="table table-bordered form-inline">
+            <caption>
+                <div style="height: 50px;position:relative;">
+                    统计类型：<select class="form-c" @click="ccccc" style="position: relative;top: 1px" v-model.lazy="types">
+                        <option value="3">所有</option>
+                        <option value="1">年度</option>
+                        <option value="2">月度</option>
+                    </select>
+                    <select id="year" v-if="types == 1" class="form-c" v-model.lazy="result.time">
+                        <option v-for="year in years" :value="year.value" :key="year.value">{{year.label}}</option>
+                    </select>
+                    <input type="month" v-if="types == 2" class="form-c" v-model.lazy="result.time">
+                    <input type="text" class="form-c" style="margin-top: 10px" placeholder="自行车编号" v-model.lazy="result.bicycle_code">
+                    <input style="height: 28px;width:80px;font-size: 10px" class="btn btn-primary" type="button" value="搜索" @click="searchBtn">
+                </div>
+                 车辆数量：<label style="width: 80px">{{reportAll.自行车数量}}/辆</label>
+                 借还次数：<label  style="width: 80px">{{reportAll.总借还次数}}/次</label>
+                 平均借车收入：<label style="width: 80px">{{reportAll.平均借还金额}}/元</label>
+                 总借车收入：<label style="width: 80px" >{{reportAll.总借还金额}}/元</label>
+                 修理次数：<label style="width: 80px" >{{reportAll.总修理次数}}/次</label>
+                 平均修理费：<label  style="width: 80px" >{{reportAll.平均修理费用}}/元</label>
+                总修理费：<label  style="width: 80px" >{{reportAll.总修理费用}}/元</label>
+
+            </caption>
+            <thead>
+            <tr>
+                <th>自行车编号</th>
+                <th>借还次数(次)</th>
+                <th>借还时间(分)</th>
+                <th>平均借还时间(分)</th>
+                <th>借车收入(元)</th>
+                <th>平均借车费用(元)</th>
+                <th>修理次数(次)</th>
+                <th>修理费用(元)</th>
+                <th>平均修理费用(元)</th>
+                <th>调度次数(次)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="re in report">
+                <td>{{re.自行车编号}}</td>
+                <td>{{re.借还次数}}</td>
+                <td>{{re.总借还时间}}</td>
+                <td>{{re.平均借还时间}}</td>
+                <td>{{re.总借还金额}}</td>
+                <td>{{re.平均借还金额}}</td>
+                <td>{{re.修理次数}}</td>
+                <td>{{re.总修理费用}}</td>
+                <td>{{re.平均修理费用}}</td>
+                <td>{{re.调度次数}}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="footer" style="width: 100%" align="center" >
+            <a style="color: black;cursor: text">共&nbsp;</a>
+            <a style="color: black;cursor: text">{{totalResult}}</a>
+            <a style="color: black;cursor: text">&nbsp;条</a>
+            &nbsp;&nbsp;<a @click="goFirst">首页</a>
+            &nbsp;&nbsp;<a @click="goPre">上一页</a>
+            &nbsp;&nbsp;<a @click="goNext">下一页</a>
+            &nbsp;<a @click="goEnd">尾页</a>
+            &nbsp;&nbsp;<a style="color: black;cursor: text">第</a>
+            <input type="text" onkeyup="value=value.replace(/^[\D0]*$/g, '')" class="form-c" style="width: 50px" id="toPageNum" v-model.lazy="currentPage">
+            &nbsp;<a style="color: black;cursor: text">页</a>
+            &nbsp;<a style="color: black;cursor: text">共</a>
+            &nbsp;<a style="color: black;cursor: text">{{totalPage}}</a>
+            &nbsp;<a style="color: black;cursor: text">页</a>
+            &nbsp;&nbsp;<button class="btn btn-success" @click="goJump">跳转</button>
+
+            <div v-show="tips" class="alert alert-danger alert-dismissable" style="width: 200px;margin-top: 20px">
+                <span style="color: red;margin-left: 20px" >{{tips}}</span>
+            </div>
+
+        </div >
+    </div>
+</div>
+
+</body>
+<script type="text/javascript">
+    var vender = new Vue({
+        el : "#table",
+        data:{
+            report:{},
+            result:{
+                bicycle_code:"",
+                time:"",
+                pageNum:1
+            },
+            years: [
+            ],
+            reportAll:{},
+            currentPage:"",
+            totalPage:"",
+            totalResult:"",
+            tips:"",
+            types:"3",
+        },
+        methods:{
+            init:function (){
+                var d = new Date();
+                // var month = d.getMonth()+1;
+                // if(month<10){
+                //     month = "0"+month;
+                // }
+                // var day = d.getDate();
+                // if(day<10){
+                //     day = "0"+day;
+                // }
+                // this.map.time = d.getFullYear()+"-"+month+"-"+day
+                // this.result.time = d.getFullYear() //默认现在年份
+                for(var i =2000;i<2100;i++){
+                    var x = {value:i,label:i};
+                    this.years.push(x);
+                }
+                this.$http.post("../main/report/getReport", {resultMap:this.result},{emulateJSON:true}).then(
+                    function(resp){
+                        this.report = resp.body.list;
+                        this.totalPage = resp.body.pages;
+                        this.totalResult = resp.body.total;
+                        this.currentPage = resp.body.pageNum;
+                    }
+                );
+                this.$http.post("../main/report/getReportAll", {resultMap:this.result},{emulateJSON:true}).then(
+                    function(resp){
+                        this.reportAll = resp.body;
+                    }
+                );
+            },
+            ccccc:function (){
+                if(this.types == "1"){
+                    for(var i = 2000;i<2100;i++){
+                        console.log(i)
+                        $("#year").append('<option value="'+i+'">'+i+'</option>');
+                    }
+                };
+                if(this.types == "3"){
+                    this.result.time="";
+                };
+            },
+            searchBtn:function (){
+                this.report.pageNum = 1;
+                this.$http.post("../main/report/getReport", {resultMap:this.result},{emulateJSON:true}).then(
+                    function(resp){
+                        this.report = resp.body.list;
+                        this.totalPage = resp.body.pages;
+                        this.totalResult = resp.body.total;
+                        this.currentPage = resp.body.pageNum;
+                    }
+                );
+                this.$http.post("../main/report/getReportAll", {resultMap:this.result},{emulateJSON:true}).then(
+                    function(resp){
+                        this.reportAll = resp.body;
+                    }
+                );
+            },
+            goFirst:function (){
+                changePage(1);
+            },
+            goPre:function (){
+                if(parseInt(this.currentPage)>1){
+                    changePage(parseInt(this.currentPage)-1);
+                }
+            },
+            goNext:function (){
+                if(parseInt(this.currentPage)<parseInt(this.totalPage)){
+                    changePage(parseInt(this.currentPage)+1);
+                }
+            },
+            goEnd:function (){
+                changePage(this.totalPage);
+            },
+            goJump:function (){
+                if(parseInt(this.currentPage)>parseInt(this.totalPage) || this.currentPage==""){
+                    this.tips = "请输入范围内的页数";
+                }else {
+                    this.tips = "";
+                    changePage(this.currentPage);
+                }
+            }
+        },
+        mounted:function(){
+            //生命周期函数：加载完毕后自动执行
+            this.init();
+            this.username = sessionStorage.getItem("username");
+        }
+    });
+
+    function changePage(pageNum){
+        vender.result.pageNum = pageNum;
+        vender.$http.post("../main/report/getReport", {resultMap:vender.result},{emulateJSON:true}).then(
+            function(resp){
+                vender.report = resp.body.list;
+                vender.totalPage = resp.body.pages;
+                vender.totalResult = resp.body.total;
+                vender.currentPage = resp.body.pageNum;
+            }
+        );
+    }
+
+
+
+</script>
+</html>

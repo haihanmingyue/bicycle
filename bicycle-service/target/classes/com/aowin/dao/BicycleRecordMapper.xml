@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace - 对应具体的接口的名字  -->
+<mapper namespace="com.aowin.dao.BicycleRecordMapper">
+
+    <select id="selectById" parameterType="int" resultType="int">
+        select count(1) from bicycle_record where record_id = #{record_id}
+    </select>
+
+    <select id="selectByCardId" parameterType="int" resultType="com.aowin.model.BicycleRecord">
+        select record_id,bicycle_id,card_id,rent_time from bicycle_record where card_id = #{card_id} and (return_time is null or return_time = "")
+    </select>
+
+
+    <insert id="rentAndReturnInsert" parameterType="map">
+        insert into bicycle_record (
+        record_id,bicycle_id,card_id,rent_time,rent_pile_id
+        ) values (
+        #{record_id},#{bicycle_id},#{card_id},#{rent_time},#{rent_pile_id}
+        );
+    </insert>
+
+    <update id="update" parameterType="map">
+        update bicycle_record set return_time = #{return_time},
+        return_pile_id = #{return_pile_id},money = #{money} where
+        record_id = #{record_id}
+    </update>
+
+</mapper>

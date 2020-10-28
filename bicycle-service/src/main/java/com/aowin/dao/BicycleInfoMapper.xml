@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace - 对应具体的接口的名字  -->
+<mapper namespace="com.aowin.dao.BicycleInfoMapper">
+
+	<select id="cardHaveBicycle" parameterType="int" resultType="int">
+     select count(1) from bicycle_info where card_id = #{card_id}
+	</select>
+
+	<update id="updateBicycleInfo" parameterType="map">
+		update bicycle_info set status = 2,pile_id = null,card_id = #{card_id} where bicycle_id = #{bicycle_id}
+	</update>
+
+	<update id="updateReturnBicycleInfo" parameterType="map">
+		update bicycle_info set status = 3,pile_id = #{pile_id},card_id = null where bicycle_id = #{bicycle_id}
+	</update>
+
+	<select id="yearOrMonthAllFee" parameterType="map" resultType="map">
+	    SELECT count(1) 自行车数量,sum(bbb.借还次数) 总借还次数,ROUND(sum(bbb.总借还金额)/sum(bbb.借还次数),2) 平均借还金额 ,sum(bbb.总借还金额) 总借还金额, sum(bbb.总借还时间) 总借还时间,SUM(bbb.修理次数) 总修理次数,SUM(bbb.总修理费用) 总修理费用,ROUND(sum(bbb.总修理费用)/sum(bbb.修理次数),2) 平均修理费用,SUM(bbb.调度次数) 总调度次数
+	    FROM (
+	    SELECT bi.BICYCLE_ID,bi.BICYCLE_CODE 自行车编号,b.* ,c.*,(d.调出次数+nn.调入次数) 调度次数 FROM bicycle_info bi
+	    LEFT JOIN
+		(SELECT BICYCLE_ID b1,count(BICYCLE_ID) 借还次数,ROUND(AVG(MONEY),2) 平均借还金额,SUM(MONEY) 总借还金额,ROUND(AVG(timestampdiff(MINUTE,RENT_TIME,RETURN_TIME)),2) 平均借还时间,ROUND(sum(timestampdiff(MINUTE,RENT_TIME,RETURN_TIME)),2) 总借还时间 FROM bicycle_record WHERE (RETURN_TIME &lt;&gt;'' and RETURN_TIME is not null) AND RETURN_TIME like "%"#{time}"%" GROUP BY BICYCLE_ID) b ON bi.BICYCLE_ID = b.b1
+		LEFT JOIN
+		(SELECT BICYCLE_ID b2,count(BICYCLE_ID) 修理次数,ROUND(AVG(FEE),2) 平均修理费用,SUM(FEE) 总修理费用 FROM repair_record  WHERE (REPAIR_DATE &lt;&gt;'' and REPAIR_DATE is not null) AND REPAIR_DATE like "%"#{time}"%" GROUP BY BICYCLE_ID) c ON bi.BICYCLE_ID = c.b2
+		LEFT JOIN
+		(SELECT BICYCLE_ID b3,count(FROM_TIME) 调出次数 FROM bicycle_deploy WHERE (FROM_TIME &lt;&gt;'' and FROM_TIME is not null) AND FROM_TIME like "%"#{time}"%"  GROUP BY BICYCLE_ID) d ON bi.BICYCLE_ID = d.b3
+		LEFT JOIN
+		(SELECT BICYCLE_ID b4,count(TO_TIME) 调入次数 FROM bicycle_deploy WHERE (TO_TIME &lt;&gt;'' and TO_TIME is not null) AND TO_TIME like "%"#{time}"%"  GROUP BY BICYCLE_ID) nn ON bi.BICYCLE_ID = nn.b4
+		WHERE bi.BICYCLE_CODE like "%"#{bicycle_code}"%"
+		ORDER BY bi.BICYCLE_ID asc) bbb
+	</select>
+
+	<select id="yearOrMonthBicycleFee" parameterType="map" resultType="map">
+		SELECT bi.BICYCLE_ID,bi.BICYCLE_CODE 自行车编号,b.* ,c.*,(d.调出次数+nn.调入次数) 调度次数 FROM bicycle_info bi
+		LEFT JOIN
+		(SELECT BICYCLE_ID b1,count(BICYCLE_ID) 借还次数,ROUND(AVG(MONEY),2) 平均借还金额,SUM(MONEY) 总借还金额,ROUND(AVG(timestampdiff(MINUTE,RENT_TIME,RETURN_TIME)),2) 平均借还时间,ROUND(sum(timestampdiff(MINUTE,RENT_TIME,RETURN_TIME)),2) 总借还时间 FROM bicycle_record WHERE (RETURN_TIME &lt;&gt;'' and RETURN_TIME is not null) AND RETURN_TIME like "%"#{time}"%" GROUP BY BICYCLE_ID) b ON bi.BICYCLE_ID = b.b1
+		LEFT JOIN
+		(SELECT BICYCLE_ID b2,count(BICYCLE_ID) 修理次数,ROUND(AVG(FEE),2) 平均修理费用,SUM(FEE) 总修理费用 FROM repair_record  WHERE (REPAIR_DATE &lt;&gt;'' and REPAIR_DATE is not null) AND REPAIR_DATE like "%"#{time}"%" GROUP BY BICYCLE_ID) c ON bi.BICYCLE_ID = c.b2
+		LEFT JOIN
+		(SELECT BICYCLE_ID b3,count(FROM_TIME) 调出次数 FROM bicycle_deploy WHERE (FROM_TIME &lt;&gt;'' and FROM_TIME is not null) AND FROM_TIME like "%"#{time}"%"  GROUP BY BICYCLE_ID) d ON bi.BICYCLE_ID = d.b3
+		LEFT JOIN
+		(SELECT BICYCLE_ID b4,count(TO_TIME) 调入次数 FROM bicycle_deploy WHERE (TO_TIME &lt;&gt;'' and TO_TIME is not null) AND TO_TIME like "%"#{time}"%"  GROUP BY BICYCLE_ID) nn ON bi.BICYCLE_ID = nn.b4
+		WHERE bi.BICYCLE_CODE like "%"#{bicycle_code}"%"
+		ORDER BY bi.BICYCLE_ID asc
+
+	</select>
+
+</mapper>

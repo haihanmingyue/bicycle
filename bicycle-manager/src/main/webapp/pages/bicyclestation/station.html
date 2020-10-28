@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>车点管理</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="../css/metisMenu.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="../css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- jQuery -->
+    <script src="../js/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../js/metisMenu.min.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="../js/sb-admin-2.min.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/json2.js"></script>
+    <script src="../js/vue-resource.min.js"></script>
+</head>
+<style>
+    th{
+        background-color: #d4d4d4;
+    }
+    .form-c{
+        position: relative;
+        margin-left: 0px;
+        height: 30px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    }
+    .form-c:focus {
+        border-color: #66afe9;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+    .menu{
+        border-radius: 2px;
+    }
+    .menu:hover{
+        cursor: pointer;
+    }
+    .menuMsg{
+        display: none;
+    }
+</style>
+<body>
+<div id="blackGround"  style="background-color: black;position: absolute;z-index: 1;width: 100%;height: 100%;opacity: 0.5;left: -10px">
+   &nbsp;
+</div>
+<div id="station_pile_msg" onscroll="pile_scroll()"  class="col-xs-10 col-sm-10" style="margin-left: 8%;margin-top: 5%;height: 620px;overflow: auto;;border-radius: 10px;z-index: 2;position: absolute;background-color: white">
+
+</div>
+
+<div id="fixMsgDiv" style=" height: 800px;width: 98%;margin-top:2%;overflow: auto;border-radius: 10px;z-index: 2;position: absolute;background-color: white" >
+
+</div>
+
+<div style="height: 20px" >
+    &nbsp;
+</div>
+<div >
+<span style="float: left">车点管理</span>
+<div id="sign" style="border-bottom: #d4d4d4 1px solid">
+    &nbsp;
+</div>
+
+<div id="stationTable">
+    <table id="tables" class="table table-bordered form-inline">
+        <caption>
+            <div style="height: 50px;position:relative;">
+                <input type="text" class="form-c" style="margin-top: 10px" placeholder="ID/编号/车点名/地址/负责人..." v-model.lazy="keys">
+
+                <input style="height: 28px;width:80px;font-size: 10px" class="btn btn-primary" type="button" value="搜索" @click="searchStationBtn">
+                <button style="float: right;margin-top:9px" class="btn btn-primary" @click="addNewStation">新增车点</button>
+            </div>
+        </caption>
+        <thead>
+        <tr>
+            <th>车点ID</th>
+            <th>车点编号</th>
+            <th>车点名</th>
+            <th>车桩数</th>
+            <th>地址</th>
+            <th>负责人</th>
+            <th>操作人</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="station in stations">
+            <td style="width: 7%"><a target="view_window" >{{station.station_id}}</a></td>
+            <td style="width: 10%">{{station.station_code}}</td>
+            <td style="width: 19%">{{station.station_name}}</td>
+            <td style="width: 5%">{{station.bicycle_pile_num}}</td>
+            <td style="width: 18%">{{station.address}}</td>
+            <td style="width: 10%">{{station.person_in_charge}}</td>
+            <td style="width: 6%">{{station.user_id}}</td>
+            <td style="width: 15%"><input type="button" class="btn btn-success"  @click="station_pile(station.station_id)" value="查看车桩" style="margin-left: 5px">&nbsp;<input type="button" class="btn btn-primary"  @click="fixMsg(station.station_id)" value="修改"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="footer" style="width: 100%" align="center" >
+        <a style="color: black;cursor: text">共&nbsp;</a>
+        <a style="color: black;cursor: text">{{totalResult}}</a>
+        <a style="color: black;cursor: text">&nbsp;条</a>
+        &nbsp;&nbsp;<a @click="goStationFirst">首页</a>
+        &nbsp;&nbsp;<a @click="goStationPre">上一页</a>
+        &nbsp;&nbsp;<a @click="goStationNext">下一页</a>
+        &nbsp;<a @click="goStationEnd">尾页</a>
+        &nbsp;&nbsp;<a style="color: black;cursor: text">第</a>
+        <input type="text" onkeyup="value=value.replace(/^[\D0]*$/g, '')" class="form-c" style="width: 50px" id="toPageNum" v-model.lazy="currentPage">
+        &nbsp;<a style="color: black;cursor: text">页</a>
+        &nbsp;<a style="color: black;cursor: text">共</a>
+        &nbsp;<a style="color: black;cursor: text">{{totalPage}}</a>
+        &nbsp;<a style="color: black;cursor: text">页</a>
+        &nbsp;&nbsp;<button class="btn btn-success" @click="goStationJump">跳转</button>
+
+        <div v-show="tips" class="alert alert-danger alert-dismissable" style="width: 200px;margin-top: 20px">
+            <span style="color: red;margin-left: 20px" >{{tips}}</span>
+        </div>
+
+    </div >
+</div>
+</div>
+
+</body>
+<script type="text/javascript">
+
+    var stationTable = new Vue({
+        el : "#stationTable",
+        data:{
+            stations:{},
+            currentPage:"",
+            totalPage:"",
+            totalResult:"",
+            tips:"",
+            url:"../pages/vender/venderDetails.html?venderId=",
+            addUrl:"../pages/vender/addVender.html?",
+            keys:"",
+        },
+        methods:{
+            init:function (){
+                this.$http.get("../main/station/getStation",{params:{pageNum:1,keysS:this.keys}}).then(
+                    function(resp){
+                         this.stations = resp.body.list;
+                         this.totalPage = resp.body.pages;
+                         this.totalResult = resp.body.total;
+                         this.currentPage = resp.body.pageNum;
+                    }
+                );
+            },
+            fixMsg:function (station_id){
+                $("#blackGround").css("display","block");
+                $("#fixMsgDiv").css("display","block");
+                $("#fixMsgDiv").load("bicyclestation/fixStation.html");
+                sessionStorage.setItem("station_id",station_id);
+            },
+            station_pile:function (station_id){
+                $("#blackGround").css("display","block");
+                $("#station_pile_msg").css("display","block");
+                $("#station_pile_msg").load("bicyclestation/station_pile.html");
+                sessionStorage.setItem("station_id",station_id);
+
+            },
+            addNewStation:function (){
+                $("#content").load("../pages/bicyclestation/addStation.html");
+                var venherf = "http://localhost:8080/bicycle_manager/pages/#addNewStation";
+                history.pushState(null, null,venherf);
+            },
+            searchStationBtn:function (){
+                this.$http.get("../main/station/getStation",{params:{pageNum:1,keysS:this.keys}}).then(
+                    function(resp){
+                        this.stations = resp.body.list;
+                        this.totalPage = resp.body.pages;
+                        this.totalResult = resp.body.total;
+                        this.currentPage = resp.body.pageNum;
+                    }
+                );
+            },
+            goStationFirst:function (){
+                changeStationPage(1);
+            },
+            goStationPre:function (){
+                if(parseInt(this.currentPage)>1){
+                    changeStationPage(parseInt(this.currentPage)-1);
+                }
+            },
+            goStationNext:function (){
+                if(parseInt(this.currentPage)<parseInt(this.totalPage)){
+                    changeStationPage(parseInt(this.currentPage)+1);
+                }
+            },
+            goStationEnd:function (){
+                changeStationPage(this.totalPage);
+            },
+            goStationJump:function (){
+                if(parseInt(this.currentPage)>parseInt(this.totalPage) || this.currentPage==""){
+                    this.tips = "请输入范围内的页数";
+                }else {
+                    this.tips = "";
+                    changeStationPage(this.currentPage);
+                }
+            }
+        },
+        mounted:function(){
+            //生命周期函数：加载完毕后自动执行
+            this.init();
+            this.username = sessionStorage.getItem("username");
+        }
+    });
+
+    function changeStationPage(pageNum){
+        stationTable.$http.get("../main/station/getStation",{params:{pageNum:pageNum,keysS:stationTable.$data.keys}}).then(
+            function(resp){
+                console.log(resp.body);
+                stationTable.$data.stations = resp.body.list;
+                stationTable.$data.totalPage = resp.body.pages;
+                stationTable.$data.totalResult = resp.body.total;
+                stationTable.$data.currentPage = resp.body.pageNum;
+            }
+        );
+    }
+
+    function stationFix(){
+        $("#vvv").slideToggle();
+        $("#xxx").css("display","none");
+    }
+    function pileFix(){
+        $("#xxx").slideToggle();
+        $("#vvv").css("display","none");
+    }
+
+    function closeMenu(){
+        $("#blackGround").css("display","none");
+        $("#fixMsgDiv").css("display","none");
+        $("#addPileDiv").css("display","none");
+        changeStationPage($("#toPageNum").val());
+    }
+    $("#blackGround").css("display","none");
+    $("#fixMsgDiv").css("display","none");
+    $("#station_pile_msg").css("display","none");
+    $("#blackGround").width($("#page-wrapper").width()+50);
+    $("#blackGround").height($("#page-wrapper").height());
+    window.onresize = function() {
+        $("#blackGround").width($("#page-wrapper").width()+50);
+        $("#blackGround").height($("#page-wrapper").height());
+    }
+</script>
+</html>

@@ -1,0 +1,4 @@
+com\aowin\controller\VenderController.class
+com\aowin\interceptor\LoginInterceptor.class
+com\aowin\controller\MsPhaseController.class
+com\aowin\controller\SyuserController.class

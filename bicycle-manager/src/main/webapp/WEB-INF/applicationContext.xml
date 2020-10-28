@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	<!-- 一. 创建DataSource对象 -->
+	<!--1.1  引入外部的一些资源文件 
+		location 资源文件的路径
+	-->
+
+	<!-- 四.创建service层对象 -->
+	<context:component-scan base-package="com.aowin.service.impl"/>
+
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+	<!-- 
+		1.2 创建DataSource对象
+	 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driver}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+	</bean>
+	
+	<!-- 二. 创建SqlSessionFactory对象 -->
+	<bean id="sqlsessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 设置数据源属性 -->
+		<property name="dataSource" ref="dataSource"/>
+		<property name="typeAliasesPackage" value="com.aowin.model" />
+		<property name="mapperLocations" value="classpath:com/aowin/dao/*.xml"/>
+		<!-- 配置mybatis的配置文件的路径 可选 -->
+<!--		<property name="configLocation" value="classpath:mybatis_config.xml"/>-->
+		<property name="plugins">
+			<list>
+				<bean class="com.github.pagehelper.PageInterceptor"/>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 三.创建mapper对象
+		会自动根据配置 将指定包下的mapper对象创建出来
+		
+		mapper对象的bean的名字 默认为mapper接口的名字首字母变成小写
+	 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.aowin.dao"/>
+
+		<!-- 以下配置 不要添加 但是要保证ioc容器中SqlSessionFactory对象的bean
+		的名字为 sqlSessionFactory-->
+		<!-- <property name="sqlSessionFactory" ref="sqlsessionFactory"></property> -->
+	</bean>
+
+
+
+	<!-- 五. 做事务处理  -->
+	<!-- 5.1 创建事务管理的对象 
+		负责 事务的开启 提交 回滚 关闭等等操作
+	-->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" >
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<!-- 添加事务的注解驱动 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+</beans>

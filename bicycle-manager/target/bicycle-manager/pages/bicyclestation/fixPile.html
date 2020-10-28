@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>供应商管理</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="../css/metisMenu.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="../css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- jQuery -->
+    <script src="../js/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../js/metisMenu.min.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="../js/sb-admin-2.min.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/json2.js"></script>
+    <script src="../js/vue-resource.min.js"></script>
+
+</head>
+<style>
+    th {
+        background-color: #d4d4d4;
+    }
+    a{
+        cursor: pointer;
+    }
+
+    .form-c {
+        position: relative;
+        margin-left: 0;
+        height: 30px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    }
+
+    .form-c:focus {
+        border-color: #66afe9;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+
+</style>
+<body>
+<div class="menu" onclick="closePilMsgDiv()" style="width: 40px;line-height: 30px;border-radius: 2px;height: 30px;position: absolute;right: 0;z-index:4;top: 0;background-color:deepskyblue;color: white" align="center">X</div>
+            <div  id="addPilesDiv" style="margin-top: 20px;min-width: 700px" >
+
+                <div style="" >
+                    <div style="margin-top: 30px;margin-left: 31px">
+                    供应商：<select class="form-c" v-model.lazy="bicyclePile.vender_id" style="width: 200px">
+                        <option value="">请选择</option>
+                        <option v-for="vender in venders" :value="vender.vender_id">{{vender.vender_name}}</option>
+                    </select><span style="color: red;position: relative;right: -5px" >*</span>
+                        <span style="margin-left: 40px">状态：</span>
+                        <select  class="form-c"  v-model.lazy="bicyclePile.status" style="margin-right: 30px" >
+                        <option value="">请选择</option>
+                        <option value="1">有车</option>
+                        <option value="2">无车</option>
+                        <option value="9">报废</option>
+                    </select><span style="color: red;position: relative;right: 25px" >*</span>
+                    </div>
+
+                    <br>
+                    <div style="margin-left: 15px">
+                   车桩编号： <input type="text" class="form-c" v-model.lazy="bicyclePile.pile_code" style="margin-right: 30px;" ><span style="color: red;position: relative;right: 25px" >*</span>
+                   车点ID：<input type="text" class="form-c" v-model.lazy="bicyclePile.station_id" disabled="disabled" style="margin-right: 50px" ><span style="color: red;position: relative;right: 45px" >*</span>
+                    </div>
+                    <br>
+                    <div style="margin-left: 20px">
+
+                    安装时间：<input type="date" class="form-c" style="margin-right: 50px" v-model.lazy="bicyclePile.install_time" ><span style="color: red;position: relative;right: 47px" >*</span>
+                    </div>
+                    <br>
+                    <div style="margin-left: 20px">
+                    拆解时间：<input type="date" class="form-c" style="margin-right: 43px" v-model.lazy="bicyclePile.disassembly_time" >
+                    所存车辆：<input type="text" class="form-c"  v-model.lazy="bicyclePile.bicycle_id">
+                    </div>
+                    <br>
+                    <div style="margin-left:75px;margin-top: 50px" >
+                        <textarea class="form-c" rows="10" cols="10" placeholder="备注" v-model.lazy="bicyclePile.remark" style="height: 300px;min-width: 500px" ></textarea>
+                        <div v-if="tips!='' " style="position: relative;width: 220px;left: 710px;bottom: 150px"  class="alert alert-danger alert-dismissable" >
+                            <a style="position: absolute;left: 190px" @click="closeTipsX" >X</a>
+                            <span style="color: red;height: 50px;" >{{tips}}</span>
+                        </div>
+                        <button class="btn btn-primary" @click="updatePileBtn" style="position: absolute;width: 200px;height: 50px;left: 810px;top: 560px">提交</button>
+                    </div>
+                </div>
+            </div>
+</body>
+
+<script type="text/javascript">
+
+    var addPilesDiv = new Vue({
+        el:"#addPilesDiv",
+        data:{
+            venders:{},
+            bicyclePile:{
+                vender_id:"",
+                station_id:"",
+                remark:"",
+                status:"",
+                pile_code:"",
+                install_time:"",
+                disassembly_time:"",
+                bicycle_id:""
+            },
+            tips:"",
+        },
+        methods:{
+            init:function (){
+                //地图初始化加载定位到当前城市
+                var pile_id = sessionStorage.getItem("pile_id");
+
+                this.$http.get("../main/vender/getVenderList").then(
+                    function (resp){
+                        this.venders = resp.body;
+                    });
+                this.$http.post("../main/station/getPile",{pile_id:pile_id},{emulateJSON:true}).then(
+                    function (resp){
+                        this.bicyclePile = resp.body;
+                    });
+            },
+            closeTipsX:function (){
+              this.tips = "";
+            },
+            updatePileBtn:function (){
+                var temp = true;
+                if(this.bicyclePile.remark==""){
+                    this.bicyclePile.remark = "这是备注";
+                }
+                if(this.bicyclePile.bicycle_id==""){
+                    this.bicyclePile.bicycle_id = "/";
+                }
+                if(this.bicyclePile.disassembly_time==""){
+                    this.bicyclePile.disassembly_time = "/";
+                }
+
+                if(this.bicyclePile.status == "1"){
+                    if(this.bicyclePile.bicycle_id== "/"){
+                        temp =false;
+                    }else {
+                        temp = true;
+                    }
+                }
+
+                if(this.bicyclePile.status == "2" || this.bicyclePile.status =="9" ){
+                    if(this.bicyclePile.bicycle_id != "/"){
+                        temp =false;
+                    }else {
+                        temp = true;
+                    }
+                }
+                for(var key in this.bicyclePile){
+                    if(this.bicyclePile[key] == ""){
+                        temp = false;
+                        break;
+                    }
+                }
+                if(temp){
+                    this.$http.post("../main/station/updatePile",this.bicyclePile,{emulateJSON:true}).then(
+                        function (resp){
+                            if(resp.body == "1"){
+                                addPilesDiv.$data.tips = "修改成功";
+                            }
+                            else if(resp.body == "3"){
+                                addPilesDiv.$data.tips = "车桩编号已存在";
+                            }
+                           else {
+                                addPilesDiv.$data.tips = "修改失败";
+                            }
+                        });
+                }else {
+                    if (this.bicyclePile.status == "1") {
+                        if (this.bicyclePile.bicycle_id == "/") {
+                            this.tips = "有车状态下请填写所存车辆ID"
+                        }
+                    } else if (this.bicyclePile.status == "2" || this.bicyclePile.status == "9") {
+                        if (this.bicyclePile.bicycle_id != "/") {
+                            this.tips = "无车/报废状态下请填勿写车辆ID"
+                        }
+                    } else {
+                        this.tips = "请完整填写带*号的内容";
+                    }
+                }
+            }
+    },
+        mounted:function (){
+            this.init();
+        }
+
+    })
+    function closePilMsgDiv(){
+        $("#fixMsgDiv").load("bicyclestation/fixStation.html");
+    }
+</script>
+</html>

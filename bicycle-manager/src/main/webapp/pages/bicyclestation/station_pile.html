@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>车点—>查看车桩</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="../css/metisMenu.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="../css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- jQuery -->
+    <script src="../js/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../js/metisMenu.min.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="../js/sb-admin-2.min.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/json2.js"></script>
+    <script src="../js/vue-resource.min.js"></script>
+</head>
+<style>
+    .fixed{position:fixed;top:200px;margin-top:0;}
+</style>
+<body>
+<div id="station_pile_msg_" >
+    <input type="button" class="btn btn-danger" @click="closeStationPile" value="X" style="position: relative;float:right; right: -15px">
+<table class="table table-bordered form-inline">
+    <caption>
+        <br>
+        <br>
+    </caption>
+    <thead >
+    <tr style="height: 30px" id="box">
+        <th>车桩ID</th>
+        <th>供应商ID</th>
+        <th>车桩编号</th>
+        <th>车点编号</th>
+        <th>状态</th>
+        <th>操作人</th>
+        <th>操作时间</th>
+        <th>所存车辆</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr v-for="pile in piles">
+        <td style="width: 7%"><a target="view_window" >{{pile.pile_id}}</a></td>
+        <td style="width: 7%">{{pile.vender_id}}</td>
+        <td style="width: 7%">{{pile.pile_code}}</td>
+        <td style="width: 7%">{{pile.station_id}}</td>
+        <td style="width: 5%">{{pile.status_name}}</td>
+        <td style="width: 7%">{{pile.user_id}}</td>
+        <td style="width: 10%">{{pile.operator_time}}</td>
+        <td style="width: 7%">{{pile.bicycle_id}}</td>
+    </tr>
+    </tbody>
+</table>
+</div>
+</body>
+<script>
+    var station_pile_msg_ = new Vue({
+        el:"#station_pile_msg_",
+        data:{
+            piles:{
+            }
+        },
+        methods:{
+            init:function (){
+                var station_id = sessionStorage.getItem("station_id");
+                sessionStorage.removeItem("station_id");
+                this.$http.get("../main/station/getStation_pile",{params:{station_id:station_id}}).then(
+                    function(resp){
+                        this.piles = resp.body;
+                    }
+                );
+            },
+            closeStationPile:function (){
+                $("#station_pile_msg").css("display","none");
+                $("#blackGround").css("display","none");
+            }
+        },
+        mounted:function (){
+            this.init();
+
+        }
+    })
+    //滚动条事件
+    function pile_scroll(){
+    }
+</script>
+</html>

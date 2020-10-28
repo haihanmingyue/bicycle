@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>供应商管理</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="../css/metisMenu.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="../css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- jQuery -->
+    <script src="../js/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../js/metisMenu.min.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="../js/sb-admin-2.min.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/json2.js"></script>
+    <script src="../js/vue-resource.min.js"></script>
+</head>
+<style>
+    th {
+        background-color: #d4d4d4;
+    }
+    a{
+        cursor: pointer;
+    }
+
+    .form-c {
+        position: relative;
+        margin-left: 0;
+        height: 30px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    }
+
+    .form-c:focus {
+        border-color: #66afe9;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+
+</style>
+<body>
+            <div  id="addVender" style=";min-width: 700px" >
+                <div style="" >
+                    <br>
+                    <div style="margin-left: 38px">
+                   类型： <select class="form-c" v-model.lazy="vender.vender_type">
+                    <option value="">类型</option>
+                    <option value="1">生产商</option>
+                    <option value="2">供应商</option>
+                </select>
+                    </div>
+                    <br>
+                    <div style="margin-left: 42px">
+                    名称：<input type="text" class="form-c" style="margin-right: 50px" v-model.lazy="vender.vender_name"><span style="color: red;position: relative;right: 45px" >*</span>
+                    地址：<input type="text" class="form-c" style="margin-right: 50px" v-model.lazy="vender.address"><span style="color: red;position: relative;right: 47px" >*</span>
+                    </div>
+                    <br>
+                    <div style="margin-left: 14px">
+                    联系号码：<input type="text" class="form-c" style="margin-right: 36px" v-model.lazy="vender.telPhone" ><span style="color: red;position: relative;right: 30px" >*</span>
+                    联系人：<input type="text" class="form-c" v-model.lazy="vender.contacts"><span style="color: red;position: relative;right: -3px" >*</span>
+                    </div>
+                    <br>
+                    <div>
+                        生产许可证：<input type="text" class="form-c" style="margin-right: 10px" v-model.lazy="vender.product_license"><span style="color: red;position: relative;right: 5px" >*</span>
+                        工商注册号：<input type="text" class="form-c" v-model.lazy="vender.bussiness_registration_no"><span style="color: red;position: relative;right: -3px" >*</span>
+                    </div>
+                    <br>
+                    <div style="margin-left: 14px">
+                    注册资金：<input type="text" class="form-c" v-model="vender.registered_capital"   onkeyup="enterMoney()"> 万元
+                    </div>
+                    <br>
+                    <div style="margin-left:85px" >
+                        <textarea class="form-c" rows="10" cols="10"  style="height: 300px;min-width: 700px" v-model.lazy="vender.remark"></textarea>
+                        <div v-if="tips!=''" style="position: relative;width: 220px;left: 710px;bottom: 150px"  class="alert alert-danger alert-dismissable" >
+                            <a style="position: absolute;left: 190px" @click="closeTips">X</a>
+                            <span style="color: red;height: 50px;" >{{tips}}</span>
+                        </div>
+                        <button class="btn btn-primary" @click="tiJiao" style="position: absolute;width: 200px;height: 50px;left: 810px;top: 520px">提交</button>
+                    </div>
+                </div>
+            </div>
+</body>
+<script type="text/javascript">
+    var addVender = new Vue({
+        el : "#addVender",
+        data:{
+            vender:{
+                vender_type:"",
+                vender_name:"",
+                address:"",
+                telPhone:"",
+                contacts:"",
+                product_license:"",
+                bussiness_registration_no:"",
+                registered_capital:"",
+                remark:"这个家伙很懒，没有备注"
+            },
+            tips:""
+        },
+        methods:{
+            closeTips:function (){
+              this.tips="";
+            },
+            tiJiao:function (){
+                if(this.vender.remark ==""){
+                    this.vender.remark = "这个家伙很懒，没有备注";
+                }
+                if(this.vender.registered_capital == ""){
+                    this.vender.registered_capital = 0;
+                }
+                var flag = true;
+                for (var key in this.vender){
+                    if(this.vender[key] === ""){
+                        flag = false;
+                        break;
+                    }
+                }
+                if(flag){
+                    this.tips="";
+                    this.$http.post("../main/vender/addVender",this.vender, {emulateJSON:true}).then(
+                        function (resp){
+                            if(resp.body=="1") {
+                                addVender.$data.tips = "添加成功";
+                                for (var key in addVender.$data.vender){
+                                    addVender.$data.vender[key] = "";
+                                }
+                            }else if(resp.body=="3"){
+                                addVender.$data.tips = "供应商名已存在";
+                            }
+                            else if(resp.body=="4"){
+                                addVender.$data.tips = "拥有该生产许可证的供应商已存在";
+                            }
+                            else if(resp.body=="5"){
+                                addVender.$data.tips = "拥有该工商注册号的供应商已存在";
+                            }
+                            else if(resp.body=="0"){
+                                addVender.$data.tips = "添加失败";
+                            }
+                        }
+                    );
+                }else {
+                    this.tips = "请完整的填写带*号的资料";
+                }
+            }
+        }
+    })
+    function enterMoney(){
+        addVender.vender.registered_capital = addVender.vender.registered_capital.replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1');
+
+    }
+</script>
+</html>

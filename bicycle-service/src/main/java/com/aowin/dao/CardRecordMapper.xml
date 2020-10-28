@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace - 对应具体的接口的名字  -->
+<mapper namespace="com.aowin.dao.CardRecordMapper">
+
+	<insert id="rentInsertCardRecord" parameterType="map">
+		insert into card_record
+		 (
+		 card_id,fee_type,chg_wallet_money,chg_frozen_money,create_time
+		 )
+		values (#{card_id},#{fee_type},#{chg_wallet_money},#{chg_frozen_money},#{create_time});
+	</insert>
+
+
+
+</mapper>

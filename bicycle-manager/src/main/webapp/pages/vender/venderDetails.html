@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>供应商管理</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Bootstrap Core CSS -->
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="../../css/metisMenu.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="../../css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- jQuery -->
+    <script src="../../js/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../../js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../../js/metisMenu.min.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="../../js/sb-admin-2.min.js"></script>
+    <script src="../../js/vue.min.js"></script>
+    <script src="../../js/json2.js"></script>
+    <script src="../../js/vue-resource.min.js"></script>
+</head>
+<style>
+    th {
+        background-color: #d4d4d4;
+    }
+    a{
+        cursor: pointer;
+    }
+
+    .form-c {
+        position: relative;
+        margin-left: 0px;
+        height: 30px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    }
+
+    .form-c:focus {
+        border-color: #66afe9;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+</style>
+<body>
+
+    <div class="col-lg-10 col-xs-10 col-sm-10" style="margin-left: 8%">
+            <div  id="content" >
+                <div id="table">
+                    <table id="tables" class="table table-bordered form-inline">
+                        <thead>
+                        <tr>
+                            <th>供应商ID</th>
+                            <th>供应商编号</th>
+                            <th>类型</th>
+                            <th>公司名</th>
+                            <th>地址</th>
+                            <th>联系号码</th>
+                            <th>联系人</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td style="width: 10%">{{vender.vender_id}}</td>
+                            <td style="width: 10%">{{vender.vender_code}}</td>
+                            <td style="width:10%">{{vender.typeName}}</td>
+                            <td style="width: 18%">{{vender.vender_name}}</td>
+                            <td style="width: 18%">{{vender.address}}</td>
+                            <td style="width: 10%">{{vender.telPhone}}</td>
+                            <td style="width: 10%">{{vender.contacts}}</td>
+                        </tr>
+                        </tbody>
+                        <thead>
+                        <tr>
+                            <th>生产许可证</th>
+                            <th colspan="2">工商注册号</th>
+                            <th>注册资金/万元</th>
+                            <th>操作日期</th>
+                            <th>操作人</th>
+                            <th>注销标志</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td style="width: 15%">{{vender.product_license}}</td>
+                            <td style="width: 7%" colspan="2">{{vender.bussiness_registration_no}}</td>
+                            <td style="width: 10%">{{vender.registered_capital}}</td>
+                            <td style="width: 10%">{{vender.create_time}}</td>
+                            <td style="width: 10%">{{vender.user_id}}</td>
+                            <td style="width: 10%" colspan="2">{{vender.zxbjName}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div>
+                        <table class="table table-bordered form-inline" >
+                            <thead>
+                            <tr>
+                                <th colspan="6">备注</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td style="width: 7%">{{vender.remark}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div style="float: right;margin-right: 20px">
+                  字体大小 &nbsp; &nbsp;&nbsp; <a onclick="sizeOne()">A</a>  &nbsp; &nbsp;&nbsp;<a style="font-size: 18px" onclick="sizeTwo()">A</a>  &nbsp; &nbsp;<a onclick="sizeThree()" style="font-size: 20px">A</a>
+                </div>
+            </div>
+        </div>
+</body>
+<script type="text/javascript">
+    var vender = new Vue({
+        el : "#table",
+        data:{
+            vender:{},
+        },
+        methods:{
+            init:function (){
+                var x = window.location.href.split("?");
+                x = x[1].split("=");
+                x = x[1];
+                this.$http.get("../../main/vender/venderDetails",{params:{vender_id:x}}).then(
+                    function(resp){
+                         this.vender = resp.body;
+                    }
+                );
+            },
+        },
+        mounted:function(){
+            //生命周期函数：加载完毕后自动执行
+            this.init();
+        }
+    });
+
+    function sizeOne(){
+        $("#table").css("font-size","14px");
+    }
+    function sizeTwo(){
+        $("#table").css("font-size","18px");
+    }
+    function sizeThree(){
+        $("#table").css("font-size","20px");
+    }
+
+</script>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>车点管理</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="../css/metisMenu.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="../css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- jQuery -->
+    <script src="../js/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../js/metisMenu.min.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="../js/sb-admin-2.min.js"></script>
+    <script src="../js/vue.min.js"></script>
+    <script src="../js/json2.js"></script>
+    <script src="../js/vue-resource.min.js"></script>
+</head>
+<style>
+    th{
+        background-color: #d4d4d4;
+    }
+    .form-c{
+        position: relative;
+        margin-left: 0px;
+        height: 30px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    }
+    .form-c:focus {
+        border-color: #66afe9;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+    .menu{
+        border-radius: 2px;
+    }
+    .menu:hover{
+        cursor: pointer;
+    }
+    .menuMsg{
+        display: none;
+    }
+</style>
+<body>
+
+<div style="background-color:white;width: 100%;height: 100%;position: absolute;" id="addPileDiv">
+    <div id="fixPileMsgDiv" style=" height: 800px;width: 100%;margin-top:2%;overflow: auto;border-radius: 10px;z-index: 3;position: absolute;background-color: white" >
+
+    </div>
+</div>
+    <div class="menu" onclick="closeMenu()" style="width: 40px;line-height: 30px;border-radius: 2px;height: 30px;position: absolute;right: 0;top: 0;background-color: #ac2925;color: white" align="center">X</div>
+
+    <div class="menu" onclick="stationFix()" style=";background-color: #2e6da4;width: 200px;height: 25px;text-align: right;color: white;margin-top: 30px;line-height: 25px">车点信息</div>
+    <div id="vvv" class="menuMsg" style="width: 100%;">
+        <div  id="addStationDiv" style="margin-top: 20px;min-width: 700px" >
+
+            <div style="position: absolute;left: 700px;top: 35px">
+                <input type="text" class="form-c" id="tipinput"  v-model.lazy="address" style="width: 250px">
+            </div>
+            <div id="stationMap" style="width: 400px;height: 300px;position: absolute;left: 700px;top: 100px">
+                &nbsp;
+            </div>
+            <div style="" >
+                <div style="margin-top: 30px;margin-left: 26px">
+                    地址： <input type="text" class="form-c" v-model.lazy="bicycleStation.address" ><span style="color: red;position: relative;right: -5px" >*</span>
+                </div>
+                <br>
+                <div>
+                    车点编号： <input type="text" class="form-c" v-model.lazy="bicycleStation.station_code" style="margin-right: 30px;" ><span style="color: red;position: relative;right: 25px" >*</span>
+                    车点名称：<input type="text" class="form-c" v-model.lazy="bicycleStation.station_name" style="margin-right: 50px" ><span style="color: red;position: relative;right: 45px" >*</span>
+                </div>
+                <br>
+                <div style="margin-left: 5px">
+                    车点经度：<input type="text" class="form-c" v-model.lazy="bicycleStation.longitude" style="margin-right: 30px" ><span style="color: red;position: relative;right: 25px" >*</span>
+                    车点维度：<input type="text" class="form-c" v-model.lazy="bicycleStation.latitude" style="margin-right: 50px" ><span style="color: red;position: relative;right: 47px" >*</span>
+                </div>
+                <br>
+                <div style="margin-left: 20px">
+                    车桩数：<input type="text" class="form-c" onkeyup="pileNum()" v-model="bicycleStation.bicycle_pile_num" style="margin-right: 43px"  ><span style="color: red;position: relative;right: 40px" >*</span>
+                    负责人：<input type="text" class="form-c" v-model.lazy="bicycleStation.person_in_charge" ><span style="color: red;position: relative;right: -3px" >*</span>
+                </div>
+                <br>
+                <div style="margin-left: 5px">
+                    新建日期：<input type="date" class="form-c" v-model.lazy="bicycleStation.build_time" style="width: 197px;margin-right: 30px"><span style="color: red;position: relative;right: 25px" >*</span>
+                    运行日期：<input type="date" class="form-c" v-model.lazy="bicycleStation.run_time" style="width: 197px" ><span style="color: red;position: relative;right: -3px" >*</span>
+                </div>
+                <br>
+                <div style="margin-left:75px;margin-top: 50px" >
+                    <textarea class="form-c" rows="10" cols="10" placeholder="备注" v-model.lazy="bicycleStation.remark"  style="height: 300px;min-width: 500px" ></textarea>
+                    <div v-if="tips!='' " style="position: relative;width: 220px;left: 710px;bottom: 150px"  class="alert alert-danger alert-dismissable" >
+                        <a style="position: absolute;left: 190px" @click="closeTipsX" >X</a>
+                        <span style="color: red;height: 50px;" >{{tips}}</span>
+                    </div>
+                    <button class="btn btn-primary" @click="updateStationBtn" style="position: absolute;width: 200px;height: 50px;left: 810px;top: 600px">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu" onclick="pileFix()" style="background-color: #2e6da4;width: 200px;height: 25px;text-align: right;color: white;margin-top: 30px;line-height: 25px">车桩信息</div>
+    <div id="xxx" class="menuMsg" style="width: 100%;">
+        <table class="table table-bordered form-inline">
+            <caption>
+                <input type="button" value="增加车桩信息"  class="btn btn-primary" @click="addPile" style="float: right">
+            </caption>
+            <thead >
+            <tr style="height: 30px" id="box">
+                <th>车桩ID</th>
+                <th>供应商ID</th>
+                <th>车桩编号</th>
+                <th>车点编号</th>
+                <th>状态</th>
+                <th>操作人</th>
+                <th>操作时间</th>
+                <th>所存车辆</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="pile in piles">
+                <td style="width: 7%"><a target="view_window" >{{pile.pile_id}}</a></td>
+                <td style="width: 7%">{{pile.vender_id}}</td>
+                <td style="width: 7%">{{pile.pile_code}}</td>
+                <td style="width: 7%">{{pile.station_id}}</td>
+                <td style="width: 5%">{{pile.status_name}}</td>
+                <td style="width: 7%">{{pile.user_id}}</td>
+                <td style="width: 10%">{{pile.operator_time}}</td>
+                <td style="width: 7%">{{pile.bicycle_id}}</td>
+                <td style="width: 7%"><input @click="toFixPile(pile.pile_id)" type="button" value="修改"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+</body>
+<script type="text/javascript">
+
+    var addStation = new Vue({
+        el:"#addStationDiv",
+        data:{
+            url:"https://restapi.amap.com/v3/geocode/geo",
+            key:"d5725522e210b2cb27d2402dba2bbf41",
+            address:"",
+            bicycleStation:{
+                station_id:"",
+                station_code:"",
+                station_name:"",
+                longitude:"",  //经度
+                latitude:"" , //维度
+                bicycle_pile_num:"",
+                address:"",
+                person_in_charge:"",
+                build_time:"",
+                run_time:"",
+                remark:""
+            },
+            tips:"",
+        },
+        methods:{
+            init:function (){
+                var station_id =  sessionStorage.getItem("station_id");
+                this.$http.get("../main/station/getStationMsg",{params:{station_id:station_id}}).then(
+                    function(resp){
+                        this.bicycleStation = resp.body;
+                        var map;//地图，点标记
+                        map = new AMap.Map('stationMap', {
+                            resizeEnable: true,
+                            center: [this.bicycleStation.longitude,this.bicycleStation.latitude],
+                            zoom:18
+                        })
+                        //输入提示
+                        var marker = new AMap.Marker({
+                            position: new AMap.LngLat(this.bicycleStation.longitude,this.bicycleStation.latitude),
+                            title: this.bicycleStation.address
+                        });
+                        map.add(marker);
+
+                        var autoOptions = {
+                            input: "tipinput"
+                        };
+                        var auto = new AMap.Autocomplete(autoOptions);
+                        var placeSearch = new AMap.PlaceSearch({
+                            map: map
+                        });  //构造地点查询类
+                        AMap.event.addListener(auto, "select", select);//注册监听，当选中某条记录时会触发
+                        function select(e) {
+                            placeSearch.setCity(e.poi.adcode);
+                            placeSearch.search(e.poi.name);
+                            AMap.event.addListener(placeSearch, "markerClick", function(e) {
+                                console.log(e.data);//则是包含所有的marker数据
+                                var ee = e.data;
+                                addStation.$data.bicycleStation.address = ee.address;
+                                addStation.$data.bicycleStation.longitude = ee.location.lng;
+                                addStation.$data.bicycleStation.latitude = ee.location.lat;
+                            })
+                        }
+                        function pileNum(){
+                            addStation.bicycleStation.bicycle_pile_num = addStation.bicycleStation.bicycle_pile_num .replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1');
+                        }
+                    }
+                );
+
+            },
+            closeTipsX:function (){
+                this.tips = "";
+
+            },
+            updateStationBtn:function (){
+                var temp = true;
+                if(this.bicycleStation.remark==""){
+                    this.bicycleStation.remark = "这是备注";
+                }
+                for(var key in this.bicycleStation){
+                    if(this.bicycleStation[key] == ""){
+                        temp = false;
+                        break;
+                    }
+                }
+                if(temp){
+                    this.$http.post("../main/station/updateStation",this.bicycleStation,{emulateJSON:true}).then(
+                        function (resp){
+                            if(resp.body == "1"){
+                                addStation.$data.tips = "修改成功";
+                            }
+                            else if(resp.body == "3"){
+                                addStation.$data.tips = "该地址已存在车点";
+                            }
+                            else if(resp.body == "4"){
+                                addStation.$data.tips = "车点编号已存在";
+                            }
+                            else if(resp.body == "5"){
+                                addStation.$data.tips = "车点名称已存在";
+                            }
+                            else if(resp.body == "6"){
+                                addStation.$data.tips = "该经纬度已存在车点";
+                            }else {
+                                addStation.$data.tips = "修改失败，无修改";
+                            }
+                        });
+                }else {
+                    this.tips = "请完整填写带*号的内容";
+                }
+
+            }
+        },
+        mounted:function (){
+            this.init();
+        }
+
+    })
+
+    var fixPileMsg  = new Vue({
+        el:"#xxx",
+        data:{
+            piles:{},
+            counts:0
+        },
+        methods:{
+            init:function (){
+               var station_id =  sessionStorage.getItem("station_id");
+                this.$http.get("../main/station/getStation_pile",{params:{station_id:station_id}}).then(
+                    function(resp){
+                        this.piles = resp.body;
+                    }
+                );
+            },
+            closeStationPile:function (){
+                $("#station_pile_msg").css("display","none");
+                $("#blackGround").css("display","none");
+            },
+            toFixPile:function (pile_id){
+                $("#fixMsgDiv").load("bicyclestation/fixPile.html");
+                sessionStorage.setItem("pile_id",pile_id);
+            },
+            addPile:function (){
+
+                var station_id =  sessionStorage.getItem("station_id");
+                this.$http.get("../main/station/getStation_PileCount",{params:{station_id:station_id}}).then(
+                    function(resp){
+                        this.counts = parseInt(resp.body);
+                        if(fixPileMsg.$data.counts >= parseInt(addStation.$data.bicycleStation.bicycle_pile_num)){
+                            alert("该车点车桩数已满");
+                        }else {
+                            $("#addPileDiv").css("display","block");
+                            $("#vvv").css("display","none");
+                            $("#addPileDiv").load("bicyclestation/addPile.html");
+
+                        }
+                    }
+                );
+            }
+        },
+        mounted:function (){
+            this.init();
+        }
+    })
+    function closePileDivu(){
+        $("#addPileDiv").css("display","none");
+        fixPileMsg.init();
+
+    }
+    $("#fixPileMsgDiv").css("display","none");
+    $("#addPileDiv").css("display","none");
+</script>
+</html>

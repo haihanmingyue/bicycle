@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace - 对应具体的接口的名字  -->
+<mapper namespace="com.aowin.dao.BicycleDealMapper">
+
+	<insert id="rentAndReturnUpdate" parameterType="map">
+		insert into bicycle_deal (
+		create_time,record_id,deal_name,deal_type,card_id,is_fee,chg_money,fee_type
+		) values (
+		#{create_time},#{record_id},#{deal_name},#{deal_type},#{card_id},#{is_fee},#{chg_money},#{fee_type}
+		);
+	</insert>
+
+
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace - 对应具体的接口的名字  -->
+<mapper namespace="com.aowin.dao.BicyclePileMapper">
+
+	<select id="getStation_AllPile" parameterType="int" resultType="com.aowin.model.BicyclePile">
+		select
+		*
+		from
+		bicycle_pile
+		where
+		STATION_ID = #{station_id}
+	</select>
+
+
+
+	<select id="getStation_PileCount" parameterType="int" resultType="int">
+		select
+		count(1)
+		from
+		bicycle_pile
+		where
+		STATION_ID = #{station_id}
+	</select>
+
+	<select id="selectPileById" parameterType="com.aowin.model.BicyclePile" resultType="int">
+		select
+		count(1)
+		from
+		bicycle_pile
+		where
+
+	</select>
+
+	<select id="PileMsgById"  resultType="com.aowin.model.BicyclePile">
+		select
+		*
+		from
+		bicycle_pile
+		where
+		pile_id = #{pile_id}
+
+	</select>
+
+	<select id="getPileByCode" resultType="int">
+		select
+		count(1)
+		from
+		bicycle_pile
+		where
+		pile_code = #{pile_code}
+	</select>
+
+	<insert id="addPile"  parameterType="com.aowin.model.BicyclePile" >
+		insert into
+		bicycle_pile
+		(
+		vender_id,pile_code,station_id,status,install_time,disassembly_time,
+		user_id,operator_time,bicycle_id,remark
+		)
+		values
+		(
+		#{vender_id},#{pile_code},#{station_id},#{status},#{install_time},#{disassembly_time},#{user_id},#{operator_time},#{bicycle_id},#{remark}
+		)
+
+	</insert>
+
+
+	<update id="updatePile"  parameterType="com.aowin.model.BicyclePile" >
+		update bicycle_pile
+		set vender_id = #{vender_id},pile_code=#{pile_code},status=#{status},install_time=#{install_time},bicycle_id=#{bicycle_id},
+		disassembly_time=#{disassembly_time},user_id=#{user_id},operator_time=#{operator_time},remark=#{remark}
+		where
+		pile_id = #{pile_id}
+	</update>
+
+	<update id="cancelPile" parameterType="map">
+		update bicycle_pile
+		set
+
+		where
+
+	</update>
+
+
+	<select id="userGetStationPile" parameterType="int" resultType="map">
+		select
+		bp.pile_id,bp.pile_code,bp.status,bp.bicycle_id,bi.bicycle_code
+		from
+		bicycle_pile bp left join bicycle_info bi on bi.bicycle_id = bp.bicycle_id
+		where
+		bp.station_id = #{station_id}
+	</select>
+
+
+	<select id="getPileStatus" parameterType="int" resultType="string">
+		select
+		bp.status
+		from
+		bicycle_pile bp
+		where
+		bp.pile_id = #{pile_id}
+	</select>
+
+
+	<update id="rentAndReturnUpdate"  parameterType="map" >
+		update bicycle_pile
+		set status=#{status},bicycle_id=#{bicycle_id}
+		where
+		pile_id = #{pile_id}
+	</update>
+
+</mapper>

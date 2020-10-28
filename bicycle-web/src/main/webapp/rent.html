@@ -1,0 +1,297 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>自行车系统</title>
+    <!-- Bootstrap Core CSS -->
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+
+		<!-- MetisMenu CSS -->
+		<link href="css/metisMenu.min.css" rel="stylesheet">
+
+		<!-- Custom CSS -->
+		<link href="css/sb-admin-2.min.css" rel="stylesheet">
+
+		<!-- Custom Fonts -->
+		<link href="css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+		<!-- jQuery -->
+		<script src="js/jquery.min.js"></script>
+
+		<!-- Bootstrap Core JavaScript -->
+		<script src="js/bootstrap.min.js"></script>
+		
+		<!-- Metis Menu Plugin JavaScript -->
+		<script src="js/metisMenu.min.js"></script>
+
+		<!-- Custom Theme JavaScript -->
+		<script src="js/sb-admin-2.min.js"></script>
+
+</head>
+<style>
+    #X:hover{
+        cursor: pointer;
+    }
+    #closeEnterIDCard{
+        color: white;
+    }
+    #closeEnterIDCard:hover{
+        color: white;
+        background-color: #C75450;
+        cursor: pointer;
+    }
+    #clearCard:hover{
+        cursor: pointer;
+    }
+</style>
+<body>
+
+<div>
+    <input type="button" onclick="closePileMsg()" value="X" style="position: relative;z-index:2;float: right;left:15px;top: 0;width: 40px;height: 30px;background-color: #C75450;border: 0;color: white;outline: none">
+</div>
+<!--<div v-if="show>0" style="float: right;background-color: #F2DEDE;width: 200px;height: 30px;line-height: 30px">-->
+<!--    <span style="float: right;margin-right: 10px;" id="X" @click="closeTip">X</span>-->
+<!--</div>-->
+        <div id="wrapper" class="col-xs-12 col-sm-12" >
+            <div class="row">
+                <div id="station_pile_msg_" >
+                    <div id="box" v-if="enter>0" style="left: 300px;top: 100px;position: absolute;background-color: white;height: 200px;width: 400px;box-shadow:1px 1px 5px gray;border-radius: 5px">
+                        <div id="bar"  onmousedown="xxx(event)" style="border-top-left-radius: 5px;border-top-right-radius: 5px;position: relative;color: white;top: 0;background-color: #3C3F41;z-index: 2;height: 30px;width: 400px;line-height: 30px">请输入您的租车卡号
+                        <div style="float: right;width: 40px" id="closeEnterIDCard" @click="closeEnter" align="center">X</div>
+                        </div>
+                        <div>
+                        <input type="text" onkeyup="enterCard(this)" v-model="card_code" class="form-control" style="width: 300px;margin-left: 50px;margin-top: 50px" placeholder="租车卡卡号">
+                        <div id="clearCard" v-if="Xshow>0" @click="clearEnterCard"  style="width: 10px;position:relative;left: 337px;top: -27px;z-index: 2;opacity: 0.5;color: gray">X</div>
+                        </div>
+                        <div v-if="tips!='' " style="position: relative;width: 220px;left: 50px;top: -15px" class="alert alert-danger alert-dismissable" >
+                            <a style="position: absolute;left: 190px" @click="closeXTips" >X</a>
+                            <span style="color: red;height: 50px;" >{{tips}}</span>
+                        </div>
+                        <input type="button" @click="upCardToService" value="确定" class="btn btn-primary" style="position: absolute;right: 10px;bottom: 10px;outline: none">
+                    </div>
+                <table id="tables" class="table table-bordered form-inline">
+                    <caption>
+                    </caption>
+                    <thead>
+                    <tr>
+                        <th>车桩编号</th>
+                        <th>状态</th>
+                        <th>所存车辆ID</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="pile in piles">
+                        <td >{{pile.pile_code}}</td>
+                        <td v-if="pile.status== '1'">有车</td>
+                        <td v-else-if="pile.status == '2'">无车</td>
+                        <td v-else="pile.status == '9'">报废</td>
+                        <td >{{pile.bicycle_code}}</td>
+                        <td style="width: 10%" ><input type="button" @click="rentBc(pile.pile_id,pile.bicycle_id)" value="租车">&nbsp<input type="button" @click="returnBc(pile.pile_id,pile.bicycle_id)" value="还车">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            
+        </div>   
+        </div>
+    <!-- /#wrapper -->
+
+    
+
+</body>
+<script>
+    var station_pile_msg_ = new Vue({
+        el:"#station_pile_msg_",
+        data:{
+            piles:{
+            },
+            show:1,
+            enter:0,
+            Xshow:0,
+            card_code:"",
+            tips:"",
+            flag:""
+        },
+        methods:{
+            init:function (){
+                var station_id = sessionStorage.getItem("station_id");
+                this.$http.get("rentAndReturn/userGetStationPile",{params:{station_id:station_id}}).then(
+                    function(resp){
+                        this.piles = resp.body;
+                    }
+                );
+            },
+            clearEnterCard:function (){
+               this.card_code = "";
+                this.tips ="";
+            },
+            closeXTips:function (){
+              this.tips ="";
+            },
+            upCardToService:function (){
+                var pile_id = sessionStorage.getItem("pile_id");
+                var bicycle_id = sessionStorage.getItem("bicycle_id");
+                if(this.flag == "true"){
+                    this.$http.get("rentAndReturn/rentBicycle",{params:{card_code:this.card_code,pile_id:pile_id,bicycle_id:bicycle_id}}).then(
+                        function(resp){
+                            console.log(resp.body);
+                            if(resp.body == "1"){
+                                this.tips = "成功";
+                                this.init();
+                                var t = setTimeout(function (){
+                                    station_pile_msg_.closeEnter();
+                                }, 2000);
+                            }else if(resp.body == "99"){
+                                this.tips = "发生错误，租用失败";
+                            }
+                            else if(resp.body == "2"){
+                                this.tips = "该卡已锁定,请去人工处办理相关事宜";
+                            }else if(resp.body == "3"){
+                                this.tips = "该卡已挂失,请去人工处办理相关事宜";
+                            } else if(resp.body == "0"){
+                                this.tips = "该卡已注销,请去人工处办理相关事宜";
+                            } else if(resp.body == "4"){
+                                this.tips =  this.tips = "卡内剩余金额不足200元,请充值";
+                            }else if(resp.body == "5"){
+                                this.tips = "该卡有正在租用中的自行车";
+                            }else if(resp.body == "9"){
+                                this.tips = "无效卡";
+                            }else {
+                                this.tips = "error";
+                            }
+                        });
+                }else {
+                    this.$http.get("rentAndReturn/returnBicycle",{params:{card_code:this.card_code,pile_id:pile_id}}).then(
+                        function(resp){
+                            if(resp.body == "1"){
+                                this.tips = "成功";
+                                this.init();
+                                var t = setTimeout(function (){
+                                    station_pile_msg_.closeEnter();
+                                }, 2000);
+                            }else if(resp.body == "99"){
+                                this.tips = "发生错误，还车失败";
+                            }else if(resp.body == "98"){
+                                this.tips = "卡内余额不足,请充值";
+                            }
+                            else if(resp.body == "2"){
+                                this.tips = "该卡已锁定,请去人工处办理相关事宜";
+                            }else if(resp.body == "3"){
+                                this.tips = "该卡已挂失,请去人工处办理相关事宜";
+                            } else if(resp.body == "0"){
+                                this.tips = "该卡已注销,请去人工处办理相关事宜";
+                            } else if(resp.body == "5"){
+                                this.tips = "您未租车";
+                            }else if(resp.body == "9"){
+                                this.tips = "无效卡";
+                            }else {
+                                this.tips = "error";
+                            }
+                        });
+                }
+
+            },
+            rentBc:function (pile_id,bicycle_id){
+                this.$http.get("rentAndReturn/determineStatus",{params:{pile_id:pile_id}}).then(
+                    function(resp){
+                       if(resp.body == "1"){
+                           sessionStorage.setItem("pile_id",pile_id);
+                           sessionStorage.setItem("bicycle_id",bicycle_id);
+                           this.enter =1;
+                           this.flag = "true";
+                       }else if(resp.body == "2"){
+                           alert("该车桩无车")
+                       }else {
+                           alert("该车桩已报废")
+                       }
+                    }
+                );
+            },
+            closeEnter:function (){
+              this.enter = 0;
+              this.Xshow = 0;
+              this.card_code = "";
+              this.tips = "";
+              this.flag = "";
+            },
+            returnBc:function (pile_id,bicycle_id){
+                this.$http.get("rentAndReturn/determineStatus",{params:{pile_id:pile_id}}).then(
+                    function(resp){
+                        if(resp.body == "1"){
+                            alert("该车桩有车")
+                        }else if(resp.body == "2"){
+                            sessionStorage.setItem("pile_id",pile_id);
+                            sessionStorage.setItem("bicycle_id",bicycle_id);
+                            this.enter =1;
+                            this.flag = "false";
+                        }else {
+                            alert("该车桩已报废")
+                        }
+                    }
+                );
+            },
+            closeTip:function (){
+                this.show = 0;
+            },
+            closeStationPile:function (){
+                $("#station_pile_msg").css("display","none");
+                $("#blackGround").css("display","none");
+            }
+        },
+        mounted:function (){
+            this.init();
+
+        }
+    })
+    function closePileMsg(){
+        $("#blackGround").css("display","none");
+        $("#station_pile_msg").css("display","none");
+    }
+
+
+    function enterCard(input){
+        if($(input).val() != ""){
+            station_pile_msg_.$data.Xshow = 1;
+        }else {
+            station_pile_msg_.$data.Xshow = 0;
+        }
+    }
+        //在该对象上绑定鼠标点击事件
+        xxx = (e) => {
+            //鼠标按下，计算鼠标触点距离元素左侧的距离
+            let disX = e.clientX - $("#bar").offset().left;
+            let disY = e.clientY - $("#bar").offset().top;
+            console.log(disX)
+            console.log(disY)
+            document.onmousemove = function (e) {
+                //计算需要移动的距离
+                let t =  e.clientX  - disX;
+                let P =  e.clientY - disY;
+                //移动当前元素
+
+                    $("#box").css("left", (t-300)+ 'px')
+
+                //移动当前元素
+
+                    $("#box").css("top", (P-150) + 'px')
+
+            };
+            //鼠标松开时，注销鼠标事件，停止元素拖拽。
+            document.onmouseup = function (e) {
+                document.onmousemove = null;
+                document.onmouseup = null;
+            };
+
+    }
+</script>
+</html>
